@@ -8,32 +8,37 @@ export interface User {
 }
 
 export interface PredictionResult {
-  reviewId: string;
-  predictionId: string;
-  label: "fake" | "genuine";
-  is_fake: boolean;
-  confidence: number;
-  human_score: number;
-  risk_level: "low" | "medium" | "high";
-  fake_signals: string[];
-  genuine_signals: string[];
-  word_count: number;
-  createdAt: string;
-  note?: string;
+  reviewId:          string;
+  predictionId:      string;
+  label:             string;         // "Fake" | "Genuine" | "fake" | "genuine"
+  is_fake:           boolean;
+  confidence:        number;         // float 0–1
+  human_score:       number;         // 0–100 for UI gauge
+  risk_level:        "low" | "medium" | "high";
+  detected_language: string;         // ISO 639-1, e.g. "en", "es", "zh-cn"
+  signals:           string[];       // unified structural + lexicon flags
+  word_count:        number;
+  createdAt:         string;
+  note?:             string;
+  // v1 legacy — may be present in older cached responses
+  fake_signals?:    string[];
+  genuine_signals?: string[];
 }
 
 export interface HistoryItem {
-  _id: string;
-  label: "fake" | "genuine";
-  confidence: number;
-  humanScore: number;
-  riskLevel: "low" | "medium" | "high";
-  wordCount: number;
-  createdAt: string;
+  _id:              string;
+  label:            string;
+  confidence:       number;
+  humanScore:       number;
+  riskLevel:        "low" | "medium" | "high";
+  wordCount:        number;
+  detectedLanguage: string;    // ISO 639-1
+  signals:          string[];  // may be [] for old records
+  createdAt:        string;
   review: {
-    _id: string;
-    text: string;
-    rating?: number;
+    _id:      string;
+    text:     string;
+    rating?:  number;
     platform: string;
     createdAt: string;
   };

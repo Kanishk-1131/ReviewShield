@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Languages } from "lucide-react";
 import TopBar from "../components/layout/TopBar";
 import Badge from "../components/ui/Badge";
 import { getHistory, getApiErrorMessage } from "../lib/api";
 import type { HistoryItem } from "../types";
+
+// Compact language display helper (mirrors Analyze.tsx)
+const LANG_NAMES: Record<string, string> = {
+  en: "EN", es: "ES", fr: "FR", de: "DE", it: "IT", pt: "PT",
+  zh: "ZH", "zh-cn": "ZH", ja: "JA", ko: "KO", ar: "AR",
+  hi: "HI", ta: "TA", te: "TE", ru: "RU", nl: "NL",
+};
+function langCode(code: string): string {
+  if (!code) return "EN";
+  return LANG_NAMES[code.toLowerCase()] ?? code.toUpperCase();
+}
 
 type LabelFilter = "all" | "fake" | "genuine";
 
@@ -77,8 +88,10 @@ export default function History() {
                 <tr className="border-b border-ink-100 bg-ink-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-400">
                   <th className="px-5 py-3">Review</th>
                   <th className="px-5 py-3">Platform</th>
+                  <th className="px-5 py-3">Language</th>
                   <th className="px-5 py-3">Verdict</th>
                   <th className="px-5 py-3">Confidence</th>
+                  <th className="px-5 py-3">Signals</th>
                   <th className="px-5 py-3">Date</th>
                 </tr>
               </thead>
@@ -89,12 +102,34 @@ export default function History() {
                     <td className="px-5 py-3 capitalize text-ink-500">
                       {item.review?.platform?.replace("_", " ")}
                     </td>
+                    {/* Language badge */}
+                    <td className="px-5 py-3">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700">
+                        <Languages className="h-3 w-3" />
+                        {langCode(item.detectedLanguage ?? "en")}
+                      </span>
+                    </td>
                     <td className="px-5 py-3">
                       <Badge tone={item.label === "fake" ? "danger" : "success"}>
                         {item.label === "fake" ? "Fake" : "Genuine"}
                       </Badge>
                     </td>
-                    <td className="px-5 py-3 font-mono text-ink-700">{item.confidence}%</td>
+                    {/* confidence: v2 stores 0-1 float; v1 stored 0-100 integer */}
+                    <td className="px-5 py-3 font-mono text-ink-700">
+                      {item.confidence <= 1
+                        ? `${(item.confidence * 100).toFixed(1)}%`
+                        : `${item.confidence}%`}
+                    </td>
+                    {/* Signals count chip */}
+                    <td className="px-5 py-3">
+                      {(item.signals?.length ?? 0) > 0 ? (
+                        <span className="inline-flex items-center rounded-full bg-warning-50 border border-yellow-200 px-2 py-0.5 text-xs font-semibold text-warning-700">
+                          {item.signals.length} flag{item.signals.length !== 1 ? "s" : ""}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-ink-300">—</span>
+                      )}
+                    </td>
                     <td className="px-5 py-3 text-ink-400">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </td>

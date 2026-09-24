@@ -18,3 +18,8 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Machine Learning Artifacts & Data
+ml/dataset/
+ml/model/*.pkl
+ml/model/*.json
